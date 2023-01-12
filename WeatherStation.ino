@@ -4,9 +4,9 @@
 #define I2C_STEMMAQT_WIRE &Wire1
 
 // // WiFi AP credentials
-// #include <WiFiManager.h>
-// #define WiFiAPname "CGI_AP"
-// #define WiFiAPpass "cgi@cgi.com"
+#include <WiFiManager.h>
+#define WiFiAPname "CGI_AP"
+#define WiFiAPpass "cgi@cgi.com"
 
 // // Preparing NeoPixel LED
 #include <Adafruit_NeoPixel.h>
@@ -16,21 +16,21 @@ LED WiFiLED(&pix, 'B');
 LED ErrLED(&pix, 'R');
 LED BusyLED(&pix, 'G');
 
-// Preparing the sensors
-// #include <Adafruit_BME680.h>
+// // Preparing the sensors
 #include "Env.h"
 Adafruit_BME680 bme(I2C_STEMMAQT_WIRE);
-// Adafruit_LTR390 ltr(I2C_STEMMAQT_WIRE);
+Adafruit_LTR390 ltr {Adafruit_LTR390()};
 Env env{&ErrLED, &BusyLED, &bme, DEBUG};
 
+
+// // Telegram Bot setup
+#include <bot.h>
+
 void setup() {
-  // put your setup code here, to run once:
 
+  // // Serial Port initialisation
   Serial.begin(115200);
-  Serial.println("Adafruit BME-680 test");
-  pix.begin();
-  env.init();
-
+  
   // // WiFi AP setup
   // WiFi.mode(WIFI_STA);
   // WiFiManager wm{};
@@ -47,12 +47,16 @@ void setup() {
   //   Serial.println("WiFi could not be Connected");
   // }
 
+  // // LED initialisation
+  pix.begin();
+
   // // Environment sensor
+  env.init();
   
 
 }
 
 void loop() {
   env.log();
-  delay(3000);
+  delay(UPDATE_TIME);
 }
