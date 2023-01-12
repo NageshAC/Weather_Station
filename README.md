@@ -13,3 +13,7 @@
 |Wind Speed sensor      |***Made using Hall Effect sensor***|
 |Wind Direction sensor  |***Made using Hall Effect sensors with phase difference of 90$\degree$***|
 |Housing                |***3D printed parts***|
+
+
+***CAD Model (Isometric View)***
+![ISOMETIC VIEW](https://github.com/NageshAC/Weather_Station/blob/main/CAD/assembly.png?raw=true)
