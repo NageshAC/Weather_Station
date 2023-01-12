@@ -15,5 +15,5 @@
 |Housing                |***3D printed parts***|
 
 
-***CAD Model (Isometric View)***
+***CAD Model (Isometric View)*** <br>
 ![ISOMETIC VIEW](https://github.com/NageshAC/Weather_Station/blob/main/CAD/assembly.png?raw=true)
