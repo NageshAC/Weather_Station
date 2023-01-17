@@ -14,11 +14,12 @@
 #include "esp32-hal.h" // for millis() func
 #include <Adafruit_BME680.h>
 #include <Adafruit_LTR390.h>
+#include <WiFiClientSecure.h>
 #include <ArduinoJson.h>
 #include "LED.h"
 
 #define P_SEALVL (1013.25)  // Pressure at sea level (in mBar)
-#define UPDATE_TIME 6000    // in milli seconds
+#define UPDATE_TIME 10000    // in milli seconds
 
 typedef unsigned long int ul_t;
 
@@ -30,6 +31,9 @@ class Env {
   LED * const _BusyLED{nullptr}; // used to indicate that the microcontroler is busy
   Adafruit_BME680* const _pbme{nullptr}; // pointer to Adafruit BME-680 device variable
   Adafruit_LTR390* const _pltr{nullptr}; // pointer to Adafruit LTR-390 device variable
+  WiFiClientSecure* const _pwcs{nullptr}; // pointer to WiFiClientSecure to update Database
+  const String _host, _Qurl;
+  uint16_t _port{};
   TwoWire* const _Wire{nullptr}; // pointer to the I2C wire to which sensors are connected
 
   uint32_t  _time{},   // time for the current reading
@@ -53,9 +57,11 @@ class Env {
 
   Env (LED* const, LED* const,  Adafruit_BME680* const, const bool);
   Env(LED* const, LED* const, Adafruit_BME680* const, Adafruit_LTR390* const, TwoWire* const, const bool);
+  Env(LED* const, LED* const, Adafruit_BME680* const, Adafruit_LTR390* const, WiFiClientSecure* const, const String, const String, const uint16_t, TwoWire* const, const bool);
   void init ();
   void check_connection ();
   void update ();
   const String output_json ();
   void log ();
+  void update_DB();
 };

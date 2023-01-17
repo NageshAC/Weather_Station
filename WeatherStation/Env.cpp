@@ -1,13 +1,15 @@
-#include <stdint.h>
-#include "esp32-hal.h"
 #include "Env.h"
+
+Env::Env(LED* const ErrLED, LED* const BusyLED, Adafruit_BME680* const bme, const bool debug=false)
+: _ErrLED{ErrLED}, _BusyLED{BusyLED}, _pbme{bme}, _debug{debug}
+{}
 
 Env::Env(LED* const ErrLED, LED* const BusyLED, Adafruit_BME680* const bme, Adafruit_LTR390* const ltr, TwoWire* const theWire, const bool debug=false)
 : _ErrLED{ErrLED}, _BusyLED{BusyLED}, _pbme{bme}, _pltr{ltr}, _Wire{theWire}, _debug{debug}
 {}
 
-Env::Env(LED* const ErrLED, LED* const BusyLED, Adafruit_BME680* const bme, const bool debug=false)
-: _ErrLED{ErrLED}, _BusyLED{BusyLED}, _pbme{bme}, _debug{debug}
+Env::Env(LED* const ErrLED, LED* const BusyLED, Adafruit_BME680* const bme, Adafruit_LTR390* const ltr, WiFiClientSecure* const wifi, const String host, const String Qurl, const uint16_t HTTPSport, TwoWire* const theWire, const bool debug=false)
+: _ErrLED{ErrLED}, _BusyLED{BusyLED}, _pbme{bme}, _pltr{ltr}, _pwcs{wifi}, _host{host}, _Qurl{Qurl}, _port{HTTPSport}, _Wire{theWire}, _debug{debug}
 {}
 
 void Env::init(){
@@ -33,9 +35,9 @@ void Env::init(){
     _pltr -> configInterrupt  (true, LTR390_MODE_UVS);
   }
 
-  _out["time"] = _time;
-  _out["BME680 status: "] = _bme;
-  _out["LTR390 Status: "] = _ltr;
+  // _out["time"] = _time;
+  // _out["BME680 status: "] = _bme;
+  // _out["LTR390 Status: "] = _ltr;
   JsonArray data = _out.createNestedArray("T");
   data.add(0.);
   data.add(" *C");
@@ -94,8 +96,8 @@ void Env::update () {
 
   if ( millis()-_time > UPDATE_TIME ) {
     if (_bme) {
-      _out["BME680 status: "] = _bme;
-      _out["LTR390 Status: "] = _ltr;
+      // _out["BME680 status: "] = _bme;
+      // _out["LTR390 Status: "] = _ltr;
 
       _out["T"][0]  = _pbme -> readTemperature();
       _out["H"][0]  = _pbme -> readHumidity();
@@ -103,11 +105,16 @@ void Env::update () {
       _out["G"][0]  = _pbme -> readGas() / 1000.;
     }
     if (_ltr) {
+      // if (_debug) Serial.println(_pltr -> readUVS());
       _out["UV"][0] = _pltr -> readUVS();
     }
   }
+
+  if (_pwcs) {
+    update_DB();
+  }
+
   _wtime = _BusyLED -> off();
-  if (_debug) Serial.printf("Wait time: %d ms\n", &_wtime);
 }
 
 const String Env::output_json() {
@@ -119,4 +126,57 @@ const String Env::output_json() {
 
 void Env::log (){
   Serial.println(output_json());
+}
+
+void Env::update_DB() {
+  if (_debug) {
+    Serial.println("==========");
+    Serial.print("connecting to ");
+    Serial.println(_host);
+  }
+  // Connect to host
+  if (!_pwcs -> connect(_host.c_str(), _port) && _debug) {
+    Serial.println("connection failed");
+    return;
+  }
+  else if (_debug){
+    Serial.println("Successfully Connected");
+  }
+
+  // Processing data and sending data
+  String url = _Qurl + "?";
+  for (const auto& kv : _out.as<JsonObject>()){
+    url += "&" ;
+    url += kv.key().c_str();
+    url += "=";
+    url += kv.value()[0].as<String>();
+  }
+  if (_debug) {
+    Serial.print("requesting URL: ");
+    Serial.println(url);
+  }
+
+  _pwcs -> print(String("GET ") + url + " HTTP/1.1\r\n" +
+         "Host: " + _host + "\r\n" +
+         "User-Agent: BuildFailureDetectorESP8266\r\n" +
+         "Connection: close\r\n\r\n");
+
+  if (_debug) Serial.println("request sent");
+
+  while (_pwcs -> connected()) {
+    String line = _pwcs -> readStringUntil('\n');
+    if (line == "\r") {
+      if (_debug) Serial.println("Headers Received Sucessfully");
+      break;
+    }
+  }
+  if (_debug) {
+    String line = _pwcs -> readStringUntil('\n');
+    Serial.print("reply was : ");
+    Serial.println(line);
+    Serial.println("closing connection");
+    Serial.println("==========");
+    Serial.println();
+  }
+
 }

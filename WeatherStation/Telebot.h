@@ -9,7 +9,7 @@
  ***************************************************************************/
 #pragma once
 
-#include <Env.h>
+#include "Env.h"
 
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
@@ -23,14 +23,12 @@
 class Telebot {
   private:
   WiFiClientSecure _WiFiClient;
-  UniverasalTelegramBot _teleBot;
+  UniversalTelegramBot _teleBot;
 
   bool _debug {false};
 
   public:
   Telebot() = delete;
-  ~Telegram() = default;
+  ~Telebot() = default;
 
-  Telegram(const String, const bool);
-  void handleNewMsg ();
-}
+};
