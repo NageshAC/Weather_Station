@@ -158,7 +158,6 @@ void Env::update_DB() {
 
   _pwcs -> print(String("GET ") + url + " HTTP/1.1\r\n" +
          "Host: " + _host + "\r\n" +
-         "User-Agent: BuildFailureDetectorESP8266\r\n" +
          "Connection: close\r\n\r\n");
 
   if (_debug) Serial.println("request sent");
@@ -178,5 +177,6 @@ void Env::update_DB() {
     Serial.println("==========");
     Serial.println();
   }
+  _pwcs -> stop();
 
 }

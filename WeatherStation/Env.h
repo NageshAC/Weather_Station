@@ -19,7 +19,7 @@
 #include "LED.h"
 
 #define P_SEALVL (1013.25)  // Pressure at sea level (in mBar)
-#define UPDATE_TIME 10000    // in milli seconds
+#define UPDATE_TIME 30000    // in milli seconds
 
 typedef unsigned long int ul_t;
 
