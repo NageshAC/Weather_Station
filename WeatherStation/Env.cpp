@@ -62,8 +62,6 @@ void Env::init(){
 
   _init = true;
 
-  update();
-
 }
 
 void Env::check_connection () {
@@ -85,6 +83,8 @@ void Env::check_connection () {
     Serial.println("Could not find a valid LTR-390 sensor, check wiring!");
   else
     Serial.println("LTR-390 found");
+  
+  return;
 }
 
 void Env::update () {
@@ -109,6 +109,11 @@ void Env::update () {
       _out["UV"][0] = _pltr -> readUVS();
     }
   }
+
+  // if (_out["T"][0] == 0 && _out["H"][0] == 0) {
+  //   update();
+  //   return;
+  // }
 
   if (_pwcs) {
     update_DB();
